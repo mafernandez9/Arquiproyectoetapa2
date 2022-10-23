@@ -298,7 +298,7 @@ def main(*args):
                 #caso en que no tengamos un (Dir) y si un A y/o B en operandos
                 if ("A" in operandos or "B" in operandos) and "(" not in operandos:
                     if "B,A" == operandos or  "A,B" == operandos:
-                        operandos_temp = operandos[0:2] + " " + operandos[3]
+                        operandos_temp = operandos[0:2] + " " + operandos[2]
                         dir = "0000000000000000"
                     #caso en que sea COMANDO A / B
                     elif ("B" in operandos or "A" in operandos) and "," not in operandos:
