@@ -1,5 +1,4 @@
-from sys import last_traceback
-
+from instructions import opcodes
 
 def limpiar(nombre, nombre_limpio):
     data = ""
@@ -8,7 +7,7 @@ def limpiar(nombre, nombre_limpio):
             #sacar comentarios despues de "//" y remover espacios al principio y final de cada linea
             line = line.split("//")[0].strip()
             #agregar newline al final de cada linea si es que no lo tiene
-            if line[-2:] != "\n" and "\n" not in line:
+            if"\n" not in line:
                 line += "\n"
             if line != "\n":
                 data += line
@@ -25,7 +24,11 @@ def data(nombre):
             #que no sea la linea DATA:
             if "DATA:" not in line:
                 #remover todos los espacios innecesarios y dejarlo como "nobre valor"
-                vars.append(" ".join(line.split()))
+                line = " ".join(line.split())
+                #agregarlos como nombre, valor
+                line = line.split(" ")
+                if len(line) == 2:
+                    vars.append(line)
     return vars
 
 def code(nombre, opcodes_keys):
@@ -52,11 +55,17 @@ nombre_programa = "programa_1.txt"
 nombre_limpio = "limpio.txt"
 limpiar(nombre_programa, nombre_limpio)
 
-print(code(nombre_limpio))
+opcodes_keys = []
+for op in opcodes.keys():
+    op = op.split(" ")
+    opcodes_keys.append(op[0])
+
+instrucciones_strings = []
 
 def escribir(contador, ins):
     #transformar ins en bytearray
     #escribir en basys3 ins en contador
+    instrucciones_strings.append(ins)
     return contador + 1
 
 def decimalToBinary(decimal_value):
@@ -68,16 +77,20 @@ def hexadecimalToBinary(hexadecimal_value):
     return binary_value.zfill(16)
 
 def procesar_valor(valor):
+    if isinstance(valor, int):
+        valor = str(valor)+"d"
     last_char = valor[-1]
     if(last_char == "d"):
-        return decimalToBinary(int(valor[:-1]))
+        return decimalToBinary(valor[:-1])
     elif(last_char == "h"):
-        return hexadecimalToBinary(int(valor[:-1]))
+        return hexadecimalToBinary(valor[:-1])
     else:
         return valor[:-1].zfill(16)
     
 #VARIABLES
-variables = data()
+variables = data(nombre_limpio)
+print("------- LISTA DE VARIABLES -------")
+print(variables)
 variables_dict = {} #llave el nombre de la variable y el valor es la direcciones
 contador_variables = 0 #dir RAM en que empiezan a guardarse las variables
 
@@ -85,11 +98,11 @@ labels_dict = {} # key: label_name, value: direccion
 
 #DICCIONARIOS GUARDAN INT (no en binario) CON DIRECCION DE VARIABLE O LABEL
 
-opcodes = {}
-
 contador_instrucciones = 0
 
 for nombre, valor in variables:
+    if valor[-1] not in "dbh":
+        valor = valor + "d"
     valor = procesar_valor(valor)
     dir = contador_variables
     contador_variables += 1
@@ -99,10 +112,10 @@ for nombre, valor in variables:
     ins = lit + ins #MOV A, Lit CONCATENAR BITS
     contador_instrucciones = escribir(contador_instrucciones, ins) #escribir en ROM MOV A, Lit
     ins = opcodes["MOV (Dir), A"]
-    ins = dir + ins #MOV (Dir), A CONCATENAR BITS
+    ins = procesar_valor(dir) + ins #MOV (Dir), A CONCATENAR BITS
     contador_instrucciones = escribir(contador_instrucciones, ins) #escribir en ROM #MOV (Dir), A
 
-instrucciones = code()
+instrucciones = code(nombre_limpio, opcodes_keys)
 
 for comando, operandos in instrucciones:
     if comando != "POP" and comando != "RET":
@@ -220,3 +233,5 @@ for comando, operandos in instrucciones:
     
 
 
+print("INSTRUCCIONES")
+print(instrucciones_strings)
