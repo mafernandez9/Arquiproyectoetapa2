@@ -1,15 +1,19 @@
-﻿
-DATA:
-v1 10
-v2 10d
-v3 10b
-v4 10h
+﻿DATA:
+a E5h
+b B3h
+bits 0b
 CODE:
-MOV B, ( v4 )
-MOV A, ( 10b )
-label1:
-MOV (v1),B
-JMP label2
-1end:
-label2:
-JMP 1end
+MOV A, ( a)
+AND A , ( 1d )
+JMP loop
+bit:
+INC (2h)
+loop:
+CMP A ,0b
+JEQ end
+SHR A
+JCR bit
+JMP loop
+end:
+MOV A,(10b)
+JMP end

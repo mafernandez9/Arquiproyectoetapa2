@@ -82,7 +82,7 @@ def direct_value(value):
         int(value)
         return 
     except: 
-        return algo
+        pass
 
 def procesar_valor(valor):
     if isinstance(valor, int):
@@ -331,13 +331,13 @@ def main(*args):
                                 operandos_temp = "(Dir), " + operandos[1] #operandos[1] es A o B
                                 #try except
                                 try:
-                                    dir = procesar_valor(operandos[0])
+                                    dir = procesar_valor(operandos[0].strip("(").strip(")"))
                                 except:
                                     dir = procesar_valor(variables_dict[operandos[0].strip("(").strip(")")])
                             else:
                                 operandos_temp = operandos[0] + ", (Dir)" #operandos[0] es A o B
                                 try:
-                                    dir = procesar_valor(operandos[1])
+                                    dir = procesar_valor(operandos[1].strip("(").strip(")"))
                                 except:
                                     dir = procesar_valor(variables_dict[operandos[1].strip("(").strip(")")])
                         #caso en que tengamos (B)
@@ -366,7 +366,10 @@ def main(*args):
                             dir = "0000000000000000"
                         else:
                             operandos_temp = "(Dir)"
-                            dir = procesar_valor(variables_dict[operandos])
+                            try:
+                                dir = procesar_valor(variables_dict[operandos.strip("(").strip(")")])
+                            except:
+                                dir = procesar_valor(operandos.strip("(").strip(")"))
                     ins = comando + " " + operandos_temp
                     ins = opcodes[ins]
                     ins = dir + ins
@@ -379,10 +382,14 @@ def main(*args):
                         dir = procesar_valor(operandos)
                     else:
                         operandos_temp = "Ins"
-                        dir = procesar_valor(labels_dict[operandos])
+                        try:
+                            dir = procesar_valor(labels_dict[operandos])
+                        except:
+                            #ESTA DIRECCION ES PLACEHOLDER. UNA VEZ TERMINADO, reemplazar con dir del
+                            #labels_dict[label]
+                            dir = "LABEL;" + operandos + ";"
                     ins = comando + " " + operandos_temp
                     ins = opcodes[ins]
-                    dir = lit
                     ins = dir + ins
                     contador_instrucciones = escribir(contador_instrucciones, ins, instrucciones_strings)                    
             #caso que sea solo un label
@@ -390,7 +397,7 @@ def main(*args):
                 dir = contador_instrucciones
                 contador_instrucciones += 1
                 #direccion es contador_instruccion
-                labels_dict[operandos] = dir        
+                labels_dict[comando.strip(":").strip()] = dir        
         #caso en que COMANDO requiera de dos instrucciones
         else:
             if comando == "POP":
@@ -410,8 +417,23 @@ def main(*args):
                     ins = dir + ins_temp[i]
                     contador_instrucciones = escribir(contador_instrucciones, ins, instrucciones_strings)
 
-    print("INSTRUCCIONES")
+    print("INSTRUCCIONES CON PLACEHOLDER")
     print(instrucciones_strings)
+
+    instrucciones_finales = []
+
+    for instruccion in instrucciones_strings:
+        if "LABEL" in instruccion:
+            ins_temp = instruccion.split(";") #entrega ["LABEL", label, instruccion en bits]
+            label = ins_temp[1]
+            dir = procesar_valor(labels_dict[label])
+            ins_temp = dir + ins_temp[2]
+            instrucciones_finales.append(ins_temp)
+        else:
+            instrucciones_finales.append(instruccion)
+    
+    print("INSTRUCCIONES SIN PLACEHOLDER")
+    print(instrucciones_finales)
 
 if __name__== "__main__":
   main()
