@@ -1,16 +1,18 @@
-﻿// Esto es un comentario
-DATA:
-// Linea en blanco
-v1 10 // 10 se asume decimal
-v2 10d // 10 en decimal
-v3 10b // 10 en binario
-v4 10h // 16 en hexadecimal
-CODE:
-MOV B, ( v4 ) // B = Mem[3] = 16
-MOV A, ( 10b ) // A = Mem[2] = 2
-label1:
-MOV (v1),B // Mem[0] = 16
-JMP label2 // Salta a label2
-1end:
-label2:
-JMP 1end // Salta a 1end
+﻿DATA:
+CODE: // Canten 'La Farolera':
+MOV A,2 // 2
+MOV B,2 // y 2
+ADD A,B // son 4
+NOP // 4
+NOP // y 2
+NOP // son
+ADD A,2 // 6
+NOP //
+NOP // 6
+NOP // y 2
+ADD A,B // son 8
+MOV B,A // y 8
+ADD A,B // 16
+NOP //
+NOP //
+NOP // A = 10h , B =8h
