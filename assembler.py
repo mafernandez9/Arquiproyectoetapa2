@@ -254,7 +254,7 @@ print(instrucciones_strings) """
 
 def main(*args):
     nombre_programa = sys.argv[1]
-    nombre_limpio = "limpio.txt"
+    nombre_limpio = sys.argv[2]
     limpiar(nombre_programa, nombre_limpio)
 
     opcodes_keys = []
@@ -321,7 +321,7 @@ def main(*args):
                                 operandos_temp = "Lit, " + operandos[1]
                                 dir = procesar_valor(operandos[0])
                         ins = comando + " " + operandos_temp
-                        ins = opcodes[ins]
+                        ins = dir + opcodes[ins]
                         contador_instrucciones = escribir(contador_instrucciones, ins, instrucciones_strings)
                     #caso en que tengamos un (Dir)
                     elif "(" in operandos:
@@ -334,20 +334,20 @@ def main(*args):
                                     operandos_temp = "(Dir), " + operandos[1] #operandos[1] es A o B
                                     #try except
                                     try:
-                                        dir = procesar_valor(operandos[0].strip("(").strip(")"))
-                                    except:
                                         dir = procesar_valor(variables_dict[operandos[0].strip("(").strip(")")])
+                                    except:
+                                        dir = procesar_valor(operandos[0].strip("(").strip(")"))
                                 else:
                                     operandos_temp = operandos[0] + ", (Dir)" #operandos[0] es A o B
                                     try:
-                                        dir = procesar_valor(operandos[1].strip("(").strip(")"))
-                                    except:
                                         dir = procesar_valor(variables_dict[operandos[1].strip("(").strip(")")])
+                                    except:
+                                        dir = procesar_valor(operandos[1].strip("(").strip(")"))
                             #caso en que tengamos (B)
                             else:
                                 operandos = operandos.split(",")
                                 #caso que sea un lit el otro operando
-                                if "A" not in operandos:
+                                if "A" not in operandos and "varA" not in operandos and "varB" not in operandos:
                                     if "(" in operandos[0]:
                                         dir = procesar_valor(operandos[1]) #en este caso dir es el literal
                                         operandos_temp = "(B), Lit"
