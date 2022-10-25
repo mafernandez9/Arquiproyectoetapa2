@@ -305,5 +305,6 @@ if __name__== "__main__":
   i = 0
   for byte_arr in byte_arrays:
     instance.write(i , byte_arr)
+    i+=1
     print(byte_arr)
   instance.end()
