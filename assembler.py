@@ -280,22 +280,22 @@ def main(*args):
     arr = []
     print(instrucciones_finales)
     for inst in instrucciones_finales:
-        #byte_array.append(bytearray([int(inst[i:i+8], 2) for i in range(0, len(inst), 8)]))
-        #byte_array.append(bitstring_to_bytes(inst))
+        string = inst
         arr = []
         for i in range(0,4):
-            bits = inst[i*8 : i*8 +8]
-            arr.append(int(bits, 2).to_bytes(2, "big"))
-
-        bits = inst[32 : ]
-        arr.append(int(bits, 2).to_bytes(1, "big"))
-        barr = b''.join(arr)
-        barr = bytearray(barr)
-        byte_array.append(barr)
+            bits = string[-(36 - i*8) : -(36 - (i*8 + 8))]
+            num = int(bits, 2)
+            arr.append(num)
+        bits = string[ : 4]
+        num = int(bits, 2)
+        arr.append(num)
+        arr = arr[::-1]
+        data_2 = bytearray(arr)
+        byte_array.append(data_2)
     return(byte_array)
     # tiene tres ceros a la derecha
-    for bytee in byte_array:
-        print(''.join('{:08b}'.format(x) for x in bytearray(bytee)))
+    #for bytee in byte_array:
+        #print(''.join('{:08b}'.format(x) for x in bytearray(bytee)))
 
 
 if __name__== "__main__":
