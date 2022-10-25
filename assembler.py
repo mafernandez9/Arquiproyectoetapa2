@@ -56,27 +56,8 @@ def code(nombre, opcodes_keys):
                 leer = True
     return instrucciones
 
-""" nombre_programa = "programa_1.txt"
-nombre_limpio = "limpio.txt"
-limpiar(nombre_programa, nombre_limpio)
-
-opcodes_keys = []
-for op in opcodes.keys():
-    op = op.split(" ")
-    opcodes_keys.append(op[0])
-
-instrucciones_strings = [] """
-
 def bitstring_to_bytes(s):
     return int(s, 2).to_bytes((len(s) + 7) // 8, byteorder='big')
-
-'''def bitstring_to_bytes(s):
-    v = int(s, 2)
-    b = bytearray()
-    while v:
-        b.append(v & 0xff)
-        v >>= 8
-    return bytes(b[::-1])'''
 
 def escribir(contador, ins, instrucciones_strings):
     #transformar ins en bytearray
@@ -100,6 +81,9 @@ def direct_value(value):
         pass
 
 def procesar_valor(valor):
+    if isinstance(valor, str):
+        if valor[-1] not in "dbh":
+            valor = valor + "d"
     if isinstance(valor, int):
         valor = str(valor)+"d"
     last_char = valor[-1]
@@ -110,160 +94,6 @@ def procesar_valor(valor):
     else:
         return valor[:-1].zfill(16)
     
-""" #VARIABLES
-variables = data(nombre_limpio)
-print("------- LISTA DE VARIABLES -------")
-print(variables)
-variables_dict = {} #llave el nombre de la variable y el valor es la direcciones
-contador_variables = 0 #dir RAM en que empiezan a guardarse las variables
-
-labels_dict = {} # key: label_name, value: direccion 
-
-#DICCIONARIOS GUARDAN INT (no en binario) CON DIRECCION DE VARIABLE O LABEL
-
-contador_instrucciones = 0
-
-for nombre, valor in variables:
-    if valor[-1] not in "dbh":
-        valor = valor + "d"
-    valor = procesar_valor(valor)
-    dir = contador_variables
-    contador_variables += 1
-    lit = valor
-    variables_dict[nombre] = dir #guardar en dict la direccion de la variable
-    ins = opcodes["MOV A, Lit"]
-    ins = lit + ins #MOV A, Lit CONCATENAR BITS
-    contador_instrucciones = escribir(contador_instrucciones, ins) #escribir en ROM MOV A, Lit
-    ins = opcodes["MOV (Dir), A"]
-    ins = procesar_valor(dir) + ins #MOV (Dir), A CONCATENAR BITS
-    contador_instrucciones = escribir(contador_instrucciones, ins) #escribir en ROM #MOV (Dir), A
-
-instrucciones = code(nombre_limpio, opcodes_keys) """
-
-""" for comando, operandos in instrucciones:
-    if comando != "POP" and comando != "RET":
-        #caso que no sea label
-        if operandos is not None:
-            operandos = "".join(operandos.split())
-            #caso en que no tengamos un (Dir) y si un A y/o B en operandos
-            if ("A" in operandos or "B" in operandos) and "(" not in operandos:
-                if "B,A" == operandos or  "A,B" == operandos:
-                    operandos_temp = operandos[0:2] + " " + operandos[3]
-                    dir = "0000000000000000"
-                #caso en que sea COMANDO A / B
-                elif ("B" in operandos or "A" in operandos) and "," not in operandos:
-                    if "A" in operandos:
-                        operandos_temp = "A"
-                        dir = "0000000000000000"
-                    else:
-                        operandos_temp = "B"
-                        dir = "0000000000000000"
-                #caso en que sea A/B, Lit / Lit, A/B
-                elif ("B" in operandos or "A" in operandos) and "," in operandos:
-                    operandos = operandos.split(",")
-                    if "A" in operandos[0] or "B" in operandos[0]:
-                        operandos_temp = operandos[0] + ", Lit"
-                        dir = procesar_valor(operandos[1])
-                    else:
-                        operandos_temp = "Lit, " + operandos[1]
-                        dir = procesar_valor(operandos[0])
-                ins = comando + " " + operandos_temp
-                ins = opcodes[ins]
-                contador_instrucciones = escribir(contador_instrucciones, ins)
-            #caso en que tengamos un (Dir)
-            elif "(" in operandos:
-                #caso en que sea COMANDO ·, () / (), ·
-                if "," in operandos:
-                    #caso en que tengamos (Dir)
-                    if "(B)" not in operandos:
-                        operandos = operandos.split(",")
-                        if "(" in operandos[0]:
-                            operandos_temp = "(Dir), " + operandos[1] #operandos[1] es A o B
-                            #try except
-                            try:
-                                dir = procesar_valor(operandos[0])
-                            except:
-                                dir = procesar_valor(variables_dict[operandos[0].strip("(").strip(")")])
-                        else:
-                            operandos_temp = operandos[0] + ", (Dir)" #operandos[0] es A o B
-                            try:
-                                dir = procesar_valor(operandos[1])
-                            except:
-                                dir = procesar_valor(variables_dict[operandos[1].strip("(").strip(")")])
-                    #caso en que tengamos (B)
-                    else:
-                        operandos = operandos.split(",")
-                        #caso que sea un lit el otro operando
-                        if "A" not in operandos:
-                            if "(" in operandos[0]:
-                                dir = procesar_valor(operandos[1]) #en este caso dir es el literal
-                                operandos_temp = "(B), Lit"
-                            else:
-                                dir = procesar_valor(operandos[0]) #en este caso dir es el literal
-                                operandos_temp = "Lit, (B)"
-                        #caso en que A sea el otro operando
-                        else:
-                            if "(" in operandos[0]:
-                                operandos_temp = "(B), A"
-                                dir = "0000000000000000"
-                            else:
-                                operandos_temp = "A, (B)"
-                                dir = "0000000000000000"
-                #caso en que sea COMANDO ()
-                else:
-                    if "B" in operandos:
-                        operandos_temp = "(B)"
-                        dir = "0000000000000000"
-                    else:
-                        operandos_temp = "(Dir)"
-                        dir = procesar_valor(variables_dict[operandos])
-                ins = comando + " " + operandos_temp
-                ins = opcodes[ins]
-                ins = dir + ins
-                contador_instrucciones = escribir(contador_instrucciones, ins)
-            #caso en que sea solo COMANDO Lit / Ins
-            elif "A" not in operandos and "B" not in operandos and "," not in operandos:
-                #caso que no sea salto o CALL
-                if ("J" not in comando) and comando != "CALL":
-                    operandos_temp = "Lit"
-                    dir = procesar_valor(operandos)
-                else:
-                    operandos_temp = "Ins"
-                    dir = procesar_valor(labels_dict[operandos])
-                ins = comando + " " + operandos_temp
-                ins = opcodes[ins]
-                dir = lit
-                ins = dir + ins
-                contador_instrucciones = escribir(contador_instrucciones, ins)                    
-        #caso que sea solo un label
-        else:
-            dir = contador_instrucciones
-            contador_instrucciones += 1
-            #direccion es contador_instruccion
-            labels_dict[operandos] = dir        
-    #caso en que COMANDO requiera de dos instrucciones
-    else:
-        if comando == "POP":
-            operandos_temp = operandos
-            ins_temp = comando + " " + operandos_temp
-            ins_temp = opcodes[ins_temp]
-            dir = "0000000000000000"
-            for i in range(0,2):
-                ins = dir + ins_temp[i]
-                contador_instrucciones = escribir(contador_instrucciones, ins)
-        #caso en que sea RET
-        else:
-            ins_temp = comando
-            ins_temp = opcodes[ins_temp]
-            dir = "0000000000000000"
-            for i in range(0,2):
-                ins = dir + ins_temp[i]
-                contador_instrucciones = escribir(contador_instrucciones, ins) """
-
-
-""" print("INSTRUCCIONES")
-print(instrucciones_strings) """
-
 def main(*args):
     nombre_programa = sys.argv[1]
     nombre_limpio = sys.argv[2]
@@ -450,19 +280,30 @@ def main(*args):
     arr = []
     print(instrucciones_finales)
     for inst in instrucciones_finales:
-        byte_array.append(bytearray([int(inst[i:i+8], 2) for i in range(0, len(inst), 8)]))
+        #byte_array.append(bytearray([int(inst[i:i+8], 2) for i in range(0, len(inst), 8)]))
+        #byte_array.append(bitstring_to_bytes(inst))
+        arr = []
+        for i in range(0,4):
+            bits = inst[i*8 : i*8 +8]
+            arr.append(int(bits, 2).to_bytes(2, "big"))
+
+        bits = inst[32 : ]
+        arr.append(int(bits, 2).to_bytes(1, "big"))
+        barr = b''.join(arr)
+        barr = bytearray(barr)
+        byte_array.append(barr)
     return(byte_array)
     # tiene tres ceros a la derecha
-    #for bytee in byte_array:
-    #    print(''.join('{:08b}'.format(x) for x in bytearray(bytee)))
+    for bytee in byte_array:
+        print(''.join('{:08b}'.format(x) for x in bytearray(bytee)))
 
 
 if __name__== "__main__":
   byte_arrays = main()
-  instance = Basys3
+  instance = Basys3()
   instance.begin()
   i = 0
   for byte_arr in byte_arrays:
     instance.write(i , byte_arr)
-    i += 1
+    print(byte_arr)
   instance.end()
