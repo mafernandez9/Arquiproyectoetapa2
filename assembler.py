@@ -1,5 +1,6 @@
 from instructions import opcodes
 import sys
+import time
 from iic2343 import Basys3
 
 def limpiar(nombre, nombre_limpio):
@@ -31,6 +32,8 @@ def data(nombre):
                 line = line.split(" ")
                 if len(line) == 2:
                     vars.append(line)
+                elif len(line) == 1:
+                    vars.append([None, line[0]])
     return vars
 
 def code(nombre, opcodes_keys):
@@ -125,7 +128,8 @@ def main(*args):
             dir = contador_variables
             contador_variables += 1
             lit = valor
-            variables_dict[nombre] = dir #guardar en dict la direccion de la variable
+            if nombre is not None:
+                variables_dict[nombre] = dir #guardar en dict la direccion de la variable
             ins = opcodes["MOV A, Lit"]
             ins = lit + ins #MOV A, Lit CONCATENAR BITS
             contador_instrucciones = escribir(contador_instrucciones, ins, instrucciones_strings) #escribir en ROM MOV A, Lit
@@ -141,7 +145,7 @@ def main(*args):
                 if operandos is not None:
                     operandos = "".join(operandos.split())
                     #caso en que no tengamos un (Dir) y si un A y/o B en operandos
-                    if ("A" in operandos or "B" in operandos) and "(" not in operandos:
+                    if ("A" in operandos or "B" in operandos) and "(" not in operandos and ("J" not in comando):
                         if "B,A" == operandos or  "A,B" == operandos:
                             operandos_temp = operandos[0:2] + " " + operandos[2]
                             dir = "0000000000000000"
@@ -158,16 +162,22 @@ def main(*args):
                             operandos = operandos.split(",")
                             if "A" in operandos[0] or "B" in operandos[0]:
                                 operandos_temp = operandos[0] + ", Lit"
-                                dir = procesar_valor(operandos[1])
+                                try:
+                                    dir = procesar_valor(operandos[1])
+                                except:
+                                    dir = procesar_valor(variables_dict[operandos[1]])
                             else:
                                 operandos_temp = "Lit, " + operandos[1]
-                                dir = procesar_valor(operandos[0])
+                                try:
+                                    dir = procesar_valor(operandos[0])
+                                except:
+                                    dir = procesar_valor(variables_dict[operandos[0]])
                         ins = comando + " " + operandos_temp
                         ins = dir + opcodes[ins]
                         contador_instrucciones = escribir(contador_instrucciones, ins, instrucciones_strings)
                     #caso en que tengamos un (Dir)
                     elif "(" in operandos:
-                        #caso en que sea COMANDO ·, () / (), ·
+                        #caso en que sea COMANDO Â·, () / (), Â·
                         if "," in operandos:
                             #caso en que tengamos (Dir)
                             if "(B)" not in operandos:
@@ -191,10 +201,16 @@ def main(*args):
                                 #caso que sea un lit el otro operando
                                 if "A" not in operandos and "varA" not in operandos and "varB" not in operandos:
                                     if "(" in operandos[0]:
-                                        dir = procesar_valor(operandos[1]) #en este caso dir es el literal
+                                        try:
+                                            dir = procesar_valor(operandos[1]) #en este caso dir es el literal
+                                        except:
+                                            dir = procesar_valor(variables_dict[operandos[1]]) #en este caso dir es el literal
                                         operandos_temp = "(B), Lit"
                                     else:
-                                        dir = procesar_valor(operandos[0]) #en este caso dir es el literal
+                                        try:
+                                            dir = procesar_valor(operandos[0]) #en este caso dir es el literal
+                                        except:
+                                            dir = procesar_valor(variables_dict[operandos[0]]) #en este caso dir es el literal
                                         operandos_temp = "Lit, (B)"
                                 #caso en que A sea el otro operando
                                 else:
@@ -280,18 +296,32 @@ def main(*args):
     arr = []
     print(instrucciones_finales)
     for inst in instrucciones_finales:
-        string = inst[::-1]
-        arr = []
-        for i in range(0,4):
-            bits = string[-(36 - i*8) : -(36 - (i*8 + 8))]
-            num = int(bits, 2)
-            arr.append(num)
-        bits = string[ : 4]
+        #string = inst[::-1]
+        arr = bytearray()
+        bits = inst[ 0: 4]
         num = int(bits, 2)
         arr.append(num)
-        arr = arr[::-1]
-        data_2 = bytearray(arr)
-        byte_array.append(data_2)
+        bits = inst[4 : 12]
+        num = int(bits, 2)
+        arr.append(num)
+        bits = inst[ 12: 20]
+        num = int(bits, 2)
+        arr.append(num)
+        bits = inst[ 20: 28]
+        num = int(bits, 2)
+        arr.append(num)
+        bits = inst[ 28: 36]
+        num = int(bits, 2)
+        arr.append(num)
+        #for i in range(0,4):
+            #bits = inst[i*8 :i*8 + 8]
+            #num = int(bits, 2)
+            #arr.append(num)
+        #bits = inst[32 : ]
+        #num = int(bits, 2)
+        #arr.append(num)
+        #arr = arr[::-1]
+        byte_array.append(arr)
     return(byte_array)
     # tiene tres ceros a la derecha
     #for bytee in byte_array:
@@ -301,10 +331,11 @@ def main(*args):
 if __name__== "__main__":
   byte_arrays = main()
   instance = Basys3()
-  instance.begin()
+  instance.begin(port_number=1)
   i = 0
   for byte_arr in byte_arrays:
     instance.write(i , byte_arr)
+    time.sleep(0.1)
     i+=1
     print(byte_arr)
   instance.end()
