@@ -280,7 +280,7 @@ def main(*args):
     arr = []
     print(instrucciones_finales)
     for inst in instrucciones_finales:
-        string = inst
+        string = inst[::-1]
         arr = []
         for i in range(0,4):
             bits = string[-(36 - i*8) : -(36 - (i*8 + 8))]
