@@ -1,5 +1,6 @@
 from instructions import opcodes
 import sys
+from iic2343 import Basys3
 
 def limpiar(nombre, nombre_limpio):
     data = ""
@@ -65,6 +66,17 @@ for op in opcodes.keys():
     opcodes_keys.append(op[0])
 
 instrucciones_strings = [] """
+
+def bitstring_to_bytes(s):
+    return int(s, 2).to_bytes((len(s) + 7) // 8, byteorder='big')
+
+'''def bitstring_to_bytes(s):
+    v = int(s, 2)
+    b = bytearray()
+    while v:
+        b.append(v & 0xff)
+        v >>= 8
+    return bytes(b[::-1])'''
 
 def escribir(contador, ins, instrucciones_strings):
     #transformar ins en bytearray
@@ -420,9 +432,6 @@ def main(*args):
                         ins = dir + ins_temp[i]
                         contador_instrucciones = escribir(contador_instrucciones, ins, instrucciones_strings)
 
-    print("INSTRUCCIONES CON PLACEHOLDER")
-    print(instrucciones_strings)
-
     instrucciones_finales = []
 
     for instruccion in instrucciones_strings:
@@ -434,9 +443,26 @@ def main(*args):
             instrucciones_finales.append(ins_temp)
         else:
             instrucciones_finales.append(instruccion)
+
+    byte_array = []
     
-    print("INSTRUCCIONES SIN PLACEHOLDER")
+    largo = 0
+    arr = []
     print(instrucciones_finales)
+    for inst in instrucciones_finales:
+        byte_array.append(bytearray([int(inst[i:i+8], 2) for i in range(0, len(inst), 8)]))
+    return(byte_array)
+    # tiene tres ceros a la derecha
+    #for bytee in byte_array:
+    #    print(''.join('{:08b}'.format(x) for x in bytearray(bytee)))
+
 
 if __name__== "__main__":
-  main()
+  byte_arrays = main()
+  instance = Basys3
+  instance.begin()
+  i = 0
+  for byte_arr in byte_arrays:
+    instance.write(i , byte_arr)
+    i += 1
+  instance.end()
