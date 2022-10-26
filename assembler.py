@@ -173,10 +173,11 @@ def main(*args):
                                 except:
                                     dir = procesar_valor(variables_dict[operandos[0]])
                         ins = comando + " " + operandos_temp
+                        print(ins)
                         ins = dir + opcodes[ins]
                         contador_instrucciones = escribir(contador_instrucciones, ins, instrucciones_strings)
                     #caso en que tengamos un (Dir)
-                    elif "(" in operandos:
+                    elif "(" in operandos and ("J" not in comando):
                         #caso en que sea COMANDO Â·, () / (), Â·
                         if "," in operandos:
                             #caso en que tengamos (Dir)
@@ -197,9 +198,9 @@ def main(*args):
                                         dir = procesar_valor(operandos[1].strip("(").strip(")"))
                             #caso en que tengamos (B)
                             else:
-                                operandos = operandos.split(",")
+                                operandos = operandos.strip().split(",")
                                 #caso que sea un lit el otro operando
-                                if "A" not in operandos and "varA" not in operandos and "varB" not in operandos:
+                                if "A" != operandos[0]  and "A" != operandos[1] and "B" != operandos[0]  and "B" != operandos[1]:
                                     if "(" in operandos[0]:
                                         try:
                                             dir = procesar_valor(operandos[1]) #en este caso dir es el literal
@@ -212,17 +213,21 @@ def main(*args):
                                         except:
                                             dir = procesar_valor(variables_dict[operandos[0]]) #en este caso dir es el literal
                                         operandos_temp = "Lit, (B)"
-                                #caso en que A sea el otro operando
+                                #caso en que A/B sea el otro operando
                                 else:
+                                    if "A" == operandos[0]  or "A" == operandos[1]:
+                                        operando = "A"
+                                    else:
+                                        operando = "B"
                                     if "(" in operandos[0]:
-                                        operandos_temp = "(B), A"
+                                        operandos_temp = "(B), " + operando
                                         dir = "0000000000000000"
                                     else:
-                                        operandos_temp = "A, (B)"
+                                        operandos_temp = operando + ", (B)"
                                         dir = "0000000000000000"
                         #caso en que sea COMANDO ()
                         else:
-                            if "B" in operandos:
+                            if "(B)" == operandos.strip():
                                 operandos_temp = "(B)"
                                 dir = "0000000000000000"
                             else:
@@ -232,11 +237,12 @@ def main(*args):
                                 except:
                                     dir = procesar_valor(operandos.strip("(").strip(")"))
                         ins = comando + " " + operandos_temp
+                        print(ins)
                         ins = opcodes[ins]
                         ins = dir + ins
                         contador_instrucciones = escribir(contador_instrucciones, ins, instrucciones_strings)
                     #caso en que sea solo COMANDO Lit / Ins
-                    elif "A" not in operandos and "B" not in operandos and "," not in operandos:
+                    elif "A" != operandos.strip() and "B" != operandos.strip() and "," not in operandos.strip():
                         #caso que no sea salto o CALL
                         if ("J" not in comando) and comando != "CALL":
                             operandos_temp = "Lit"
@@ -250,13 +256,13 @@ def main(*args):
                                 #labels_dict[label]
                                 dir = "LABEL;" + operandos + ";"
                         ins = comando + " " + operandos_temp
+                        print(ins)
                         ins = opcodes[ins]
                         ins = dir + ins
                         contador_instrucciones = escribir(contador_instrucciones, ins, instrucciones_strings)                    
                 #caso que sea solo un label
                 else:
                     dir = contador_instrucciones
-                    contador_instrucciones += 1
                     #direccion es contador_instruccion
                     labels_dict[comando.strip(":").strip()] = dir        
             #caso en que COMANDO requiera de dos instrucciones
