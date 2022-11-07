@@ -131,6 +131,8 @@ def main(*args):
             if nombre is not None:
                 variables_dict[nombre] = dir #guardar en dict la direccion de la variable
             ins = opcodes["MOV A, Lit"]
+            print("MOV A, Lit")
+            print(lit)
             ins = lit + ins #MOV A, Lit CONCATENAR BITS
             contador_instrucciones = escribir(contador_instrucciones, ins, instrucciones_strings) #escribir en ROM MOV A, Lit
             ins = opcodes["MOV (Dir), A"]
@@ -153,13 +155,19 @@ def main(*args):
                         elif ("B" in operandos or "A" in operandos) and "," not in operandos:
                             if "A" in operandos:
                                 operandos_temp = "A"
-                                dir = "0000000000000000"
+                                #caso en que sea INC o DEC, debemos pasar el 1 a reg B para hacer la suma.
+                                if comando.strip() == "INC" or comando.strip() == "DEC":
+                                    dir = "0000000000000001"
+                                else:
+                                    dir = "0000000000000000"
                             else:
                                 operandos_temp = "B"
                                 dir = "0000000000000000"
                         #caso en que sea A/B, Lit / Lit, A/B
                         elif ("B" in operandos or "A" in operandos) and "," in operandos:
                             operandos = operandos.split(",")
+                            print("OPERADNOS ")
+                            print(operandos)
                             if "A" in operandos[0] or "B" in operandos[0]:
                                 operandos_temp = operandos[0] + ", Lit"
                                 try:
@@ -187,14 +195,23 @@ def main(*args):
                                     operandos_temp = "(Dir), " + operandos[1] #operandos[1] es A o B
                                     #try except
                                     try:
-                                        dir = procesar_valor(variables_dict[operandos[0].strip("(").strip(")")])
+                                        print("INTENTO")
+                                        dir = procesar_valor(variables_dict[operandos[0].strip("(").strip(")").strip()])
+                                        print("ACCESO DIR VAR")
+                                        print(operandos[0].strip("(").strip(")").strip())
                                     except:
+                                        print("FALLO")
                                         dir = procesar_valor(operandos[0].strip("(").strip(")"))
                                 else:
                                     operandos_temp = operandos[0] + ", (Dir)" #operandos[0] es A o B
                                     try:
-                                        dir = procesar_valor(variables_dict[operandos[1].strip("(").strip(")")])
+                                        print("INTENTO")
+                                        dir = procesar_valor(variables_dict[operandos[1].strip("(").strip(")").strip()])
+                                        print(dir)
+                                        print("ACCESO DIR VAR")
+                                        print(operandos[1].strip("(").strip(")").strip())
                                     except:
+                                        print("FALLO")
                                         dir = procesar_valor(operandos[1].strip("(").strip(")"))
                             #caso en que tengamos (B)
                             else:
@@ -256,7 +273,9 @@ def main(*args):
                                 #labels_dict[label]
                                 dir = "LABEL;" + operandos + ";"
                         ins = comando + " " + operandos_temp
+                        print("LABEL")
                         print(ins)
+                        print(operandos)
                         ins = opcodes[ins]
                         ins = dir + ins
                         contador_instrucciones = escribir(contador_instrucciones, ins, instrucciones_strings)                    
@@ -291,8 +310,8 @@ def main(*args):
             ins_temp = instruccion.split(";") #entrega ["LABEL", label, instruccion en bits]
             label = ins_temp[1]
             dir = procesar_valor(labels_dict[label])
-            ins_temp = dir + ins_temp[2]
-            instrucciones_finales.append(ins_temp)
+            ins = dir + ins_temp[2]
+            instrucciones_finales.append(ins)
         else:
             instrucciones_finales.append(instruccion)
 
@@ -300,7 +319,7 @@ def main(*args):
     
     largo = 0
     arr = []
-    print(instrucciones_finales)
+    #print(instrucciones_finales)
     for inst in instrucciones_finales:
         #string = inst[::-1]
         arr = bytearray()
@@ -341,7 +360,6 @@ if __name__== "__main__":
   i = 0
   for byte_arr in byte_arrays:
     instance.write(i , byte_arr)
-    time.sleep(0.1)
     i+=1
-    print(byte_arr)
+    #print(byte_arr)
   instance.end()
