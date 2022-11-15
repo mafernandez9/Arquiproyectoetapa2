@@ -132,7 +132,7 @@ def main(*args):
                 variables_dict[nombre] = dir #guardar en dict la direccion de la variable
             ins = opcodes["MOV A, Lit"]
             print("MOV A, Lit")
-            print(lit)
+            print(valor)
             ins = lit + ins #MOV A, Lit CONCATENAR BITS
             contador_instrucciones = escribir(contador_instrucciones, ins, instrucciones_strings) #escribir en ROM MOV A, Lit
             ins = opcodes["MOV (Dir), A"]
@@ -182,6 +182,7 @@ def main(*args):
                                     dir = procesar_valor(variables_dict[operandos[0]])
                         ins = comando + " " + operandos_temp
                         print(ins)
+                        print(dir)
                         ins = dir + opcodes[ins]
                         contador_instrucciones = escribir(contador_instrucciones, ins, instrucciones_strings)
                     #caso en que tengamos un (Dir)
