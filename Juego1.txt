@@ -1,9 +1,13 @@
 DATA:
-switch 1
-time 5
-limit 0
-reaction 0
+
+switch 1 //switch de inicio sera el primero
+time 5 //tiempo de cuenta regresiva
+limit 0 //tiempo limite
+reaction 0 //cuanto se demoro primer boton
+
 CODE:
+
+
 wait:
 MOV B, 0
 MOV (0), B
@@ -13,6 +17,8 @@ MOV A, (switch)
 MOV B, (1)
 CMP A, B
 JNE wait
+
+//A tiene tiempo limite y B tiene tiempo actual
 MOV A, (4)
 ADD A, (time)
 MOV (limit), A
@@ -26,22 +32,27 @@ CMP A, B
 JNE countdown
 MOV A, 0
 MOV (2), A
+
+//esperamos a primer boton presionado
 wait_btn
 MOV A, (3)
 MOV B, (5)
-MOV (reaction), B
+MOV (reaction), B //guardamos milisegundos
 MOV B, 0
 CMP A, B
 JEQ wait_btn
-MOV (2), A
+
+MOV (2), A //display ganador
 MOV B, (reaction)
 MOV (0), B
+
 wait_reset:
 MOV A, (1)
 MOV B, 0
 CMP A, B
 JNE wait_reset
 JEQ wait
+
 MOV A, 6
 MOV (2), A
 end:
