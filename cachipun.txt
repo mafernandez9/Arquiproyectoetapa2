@@ -3,7 +3,9 @@ score1 0
 score2 0
 rock 1
 paper 2
-scissor 3
+scissor 4
+inv1 8
+inv2 16
 play1 0
 play2 0
 win_var 3
@@ -23,20 +25,54 @@ MOV B, (1)
 CMP A, B
 JNE wait
 
-// esperar boton 
-wait_btn1
-MOV A, (3)
-MOV (play1), A //guardamos eleccion jugador 1
+MOV A, 0
 MOV B, 0
+ 
+// esperar boton
+MOV A, 1
+MOV (0), A
+wait_btn1:
+MOV B, 0
+MOV A, (3)
 CMP A, B
 JEQ wait_btn1
 
-wait_btn2
-MOV A, (3)
-MOV (play2), A //guardamos eleccion jugador 2 
+//revisar validez
+MOV B, (inv1)
+CMP A, B
+JEQ wait_btn1
+MOV B, (inv2)
+CMP A, B
+JEQ wait_btn1
+MOV (play1), A //guardamos eleccion jugador 1
+
+//delay para no confundir botones
+MOV A, (4)
+ADD A, 2
+MOV B, A
+interval:
+MOV A, (4)
+CMP A, B
+JNE interval
+
+
+// esperar boton
+MOV A, 2
+MOV (0), A
 MOV B, 0
+wait_btn2:
+MOV B, 0
+MOV A, (3)
 CMP A, B
 JEQ wait_btn2
+
+MOV B, (inv1)
+CMP A, B
+JEQ wait_btn1
+MOV B, (inv2)
+CMP A, B
+JEQ wait_btn1
+MOV (play2), A //guardamos eleccion jugador 2 
 
 //cargamos la jugada en la variable
 MOV A, (play1)
@@ -99,19 +135,23 @@ INC (score2)
 //Mostrar ganador ronda
 MOV A, 13
 MOV (2), A
+JMP check_score
 
 player1_win:
 INC (score1)
 //Mostrar ganador ronda
 MOV A, 1
 MOV (2), A
+JMP check_score
 
 player2_win:
 INC (score2)
 //Mostrar ganador ronda
 MOV A, 2
 MOV (2), A
+JMP check_score
 
+check_score:
 MOV A, (score1)
 MOV B, (win_var)
 CMP A, B 
@@ -133,23 +173,40 @@ JMP end_player1_win
 end_player1_win:
 MOV A, AAAAh
 MOV (0), A
+//limpiar scores
+MOV A, 0
+MOV (score1), A
+MOV(score2), A
 MOV A, 1
 MOV (2), A
+JMP wait_round
 
 end_player2_win:
 MOV A, AAAAh
 MOV (0), A
+MOV A, 0
+MOV (score1), A
+MOV(score2), A
 MOV A, 2
 MOV (2), A
+JMP wait_round
 
 end_draw:
 MOV A, AAAAh
 MOV (0), A
+MOV A, 0
+MOV (score1), A
+MOV(score2), A
 MOV A, 13
 MOV (2), A
+JMP wait_round
 
 wait_round:
+MOV A, (5)
+OR A, 31
+MOV (0), A
 MOV B, 0
-MOV A, (switch)
+MOV A, (1)
 CMP A, B
 JNE wait_round
+JMP wait
