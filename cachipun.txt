@@ -1,0 +1,155 @@
+DATA:
+score1 0
+score2 0
+rock 1
+paper 2
+scissor 3
+play1 0
+play2 0
+win_var 3
+switch 1 //switch de inicio sera el primero
+time 5 //tiempo de cuenta regresiva
+limit 0 //tiempo limite
+
+CODE:
+
+wait:
+MOV B, 0
+MOV (0), B
+MOV A, (3)
+MOV (2), A
+MOV A, (switch)
+MOV B, (1)
+CMP A, B
+JNE wait
+
+// esperar boton 
+wait_btn1
+MOV A, (3)
+MOV (play1), A //guardamos eleccion jugador 1
+MOV B, 0
+CMP A, B
+JEQ wait_btn1
+
+wait_btn2
+MOV A, (3)
+MOV (play2), A //guardamos eleccion jugador 2 
+MOV B, 0
+CMP A, B
+JEQ wait_btn2
+
+//cargamos la jugada en la variable
+MOV A, (play1)
+MOV B, (rock)
+CMP A, B
+JEQ player1_rock
+
+//cargamos la jugada en la variable
+MOV A, (play1)
+MOV B, (paper)
+CMP A, B
+JEQ player1_paper
+
+//cargamos la jugada en la variable
+MOV A, (play1)
+MOV B, (scissor)
+CMP A, B
+JEQ player1_scissor
+
+player1_rock:
+MOV A, (play2)
+MOV B, (rock)
+CMP A, B
+JEQ draw
+MOV B, (paper)
+CMP A, B
+JEQ player2_win
+MOV B, (scissor)
+CMP A, B
+JEQ player1_win
+
+
+player1_paper:
+MOV A, (play2)
+MOV B, (rock)
+CMP A, B
+JEQ player1_win
+MOV B, (paper)
+CMP A, B
+JEQ draw
+MOV B, (scissor)
+CMP A, B
+JEQ player2_win
+
+player1_scissor:
+MOV A, (play2)
+MOV B, (rock)
+CMP A, B
+JEQ player2_win
+MOV B, (paper)
+CMP A, B
+JEQ player1_win
+MOV B, (scissor)
+CMP A, B
+JEQ draw
+
+draw:
+INC (score1)
+INC (score2)
+//Mostrar ganador ronda
+MOV A, 13
+MOV (2), A
+
+player1_win:
+INC (score1)
+//Mostrar ganador ronda
+MOV A, 1
+MOV (2), A
+
+player2_win:
+INC (score2)
+//Mostrar ganador ronda
+MOV A, 2
+MOV (2), A
+
+MOV A, (score1)
+MOV B, (win_var)
+CMP A, B 
+JEQ end1
+
+MOV A, (score2)
+MOV B, (win_var)
+CMP A, B 
+JEQ end_player2_win
+JMP wait_round
+
+end1:
+MOV A, (score2)
+MOV B, (win_var)
+CMP A, B
+JEQ end_draw
+JMP end_player1_win
+
+end_player1_win:
+MOV A, AAAAh
+MOV (0), A
+MOV A, 1
+MOV (2), A
+
+end_player2_win:
+MOV A, AAAAh
+MOV (0), A
+MOV A, 2
+MOV (2), A
+
+end_draw:
+MOV A, AAAAh
+MOV (0), A
+MOV A, 13
+MOV (2), A
+
+wait_round:
+MOV B, 0
+MOV A, (switch)
+CMP A, B
+JNE wait_round
