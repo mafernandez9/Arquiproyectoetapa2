@@ -1,48 +1,61 @@
 DATA:
-switch 1
-time 5
-limit 0
-reaction 0
+mult_a 0
+mult_b 0
+mult_r 0
+pow_b 0
+pow_e 0
+pow_r 0
 CODE:
-wait:
-MOV B, 0
-MOV (0), B
-MOV A, (3)
-MOV (2), A
-MOV A, (switch)
-MOV B, (1)
-CMP A, B
-JNE wait
-MOV A, (4)
-ADD A, (time)
-MOV (limit), A
-countdown:
-MOV B, (4)
-SUB A, B
-MOV (2), A
-MOV B, (4)
-MOV A, (limit)
-CMP A, B
-JNE countdown
-MOV A, 0
-MOV (2), A
-wait_btn
-MOV A, (3)
-MOV B, (5)
-MOV (reaction), B
-MOV B, 0
-CMP A, B
-JEQ wait_btn
-MOV (2), A
-MOV B, (reaction)
-MOV (0), B
-wait_reset:
-MOV A, (1)
-MOV B, 0
-CMP A, B
-JNE wait_reset
-JEQ wait
-MOV A, 6
-MOV (2), A
+MOV A,4
+MOV B,3
+CALL pow
 end:
 JMP end
+pow:
+MOV (pow_b),A
+MOV (pow_e),B
+PUSH B
+MOV B,1
+MOV (pow_r),B
+pow_loop:
+MOV A,(pow_e)
+CMP A,0
+JEQ pow_end
+MOV A,(pow_r)
+MOV B,(pow_b)
+CALL mult
+MOV (pow_r),A
+MOV A,(pow_e)
+SUB A,1
+MOV (pow_e),A
+JMP pow_loop
+pow_end:
+MOV A,(pow_r)
+POP B
+RET
+mult:
+MOV (mult_a),A
+MOV (mult_b),B
+PUSH B
+MOV B,0
+MOV (mult_r),B
+mult_loop:
+MOV A,(mult_a)
+CMP A,0
+JEQ mult_end
+AND A,1
+CMP A,0
+JEQ no_sum
+MOV A,(mult_r)
+MOV B,(mult_b)
+ADD (mult_r)
+no_sum:
+MOV A,(mult_a)
+SHR (mult_a),A
+MOV A,(mult_b)
+SHL (mult_b),A
+JMP mult_loop
+mult_end:
+MOV A,(mult_r)
+POP B
+RET

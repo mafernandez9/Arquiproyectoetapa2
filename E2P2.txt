@@ -1,0 +1,32 @@
+DATA:
+  n     8
+  arr   10
+        2
+        4
+        6
+        9
+        10
+        7
+        2
+  r     0
+
+CODE: // Sumar Arreglo con Saltos
+
+      MOV B,arr
+      MOV A,(n)
+
+loop: 
+      CMP A,0    // A - 0
+      JEQ end    // SI Z = 0, PC = end
+      MOV A,(r)  // A = MEM[r]         // A = MEM[7]
+      ADD A,(B)  // A =  A + MEM[B]      
+      MOV (r),A  // MEM[r] = A         // MEM[7] = A
+      INC B      // B = B + 1            
+      MOV A,(n)  // A = MEM[n]         // A = MEM[0]
+      SUB A,1    // A = A - 1
+      MOV (n),A  // MEM[n] = A         // MEM[0] = A
+      JMP loop   // PC = loop
+
+end:  
+      MOV B,(r)
+JMP end    // PC = end

@@ -1,0 +1,68 @@
+DATA:
+
+CODE:       // Debe saltar
+
+JMP start
+
+error:
+ MOV A,FFh  // FFh a A
+ JMP error
+
+start:
+ MOV B,1    
+ MOV A,B       
+ CMP A,B
+ JEQ next1
+ JMP error
+
+next1:
+ INC A      
+ CMP A,B
+ JNE next2
+ JMP error
+
+next2:
+ MOV (0),A  
+ INC B      
+ CMP A,1
+ JGT next3
+ JMP error
+
+next3:
+ INC A      
+ INC (0)    
+ CMP A,(0)
+ JGE next4
+ JMP error
+
+next4:
+ CMP A,4
+ JLT next5
+ JMP error
+
+next5:
+ INC B
+ CMP A,3
+ JLE next6  
+ JMP error
+
+next6:
+ INC B   
+ CMP A,B
+ JLE next7
+ JMP error
+
+next7:
+ INC B    
+ SHR A      
+ JCR next8
+ JMP error
+
+next8:
+ SUB A,1    
+ JCR end
+ JMP error
+
+end:
+ MOV A,12h  // 11h a A
+ JMP end

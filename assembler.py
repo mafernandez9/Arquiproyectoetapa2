@@ -113,9 +113,10 @@ def main(*args):
     print("------- LISTA DE VARIABLES -------")
     print(variables)
     variables_dict = {} #llave el nombre de la variable y el valor es la direcciones
-    contador_variables = 8 #dir RAM en que empiezan a guardarse las variables
+    #LAS PRIMERAS 7 ESTAN RESERVADAS! PARA E3
+    #DEJAR EN 0 PARA E2!
+    contador_variables = 0 #dir RAM en que empiezan a guardarse las variables
     contador_instrucciones = 0
-    #LAS PRIMERAS 7 ESTAN RESERVADAS!
 
     labels_dict = {} # key: label_name, value: direccion 
 
